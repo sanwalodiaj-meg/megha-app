@@ -58,6 +58,11 @@
       transition: width 1s ease;
     }
 
+    .baby-emoji {
+      font-size: 60px;
+      margin-bottom: 10px;
+    }
+
     input[type="file"] {
       margin: 10px 0;
     }
@@ -102,9 +107,10 @@
     </div>
   </div>
 
-  <!-- Baby Growth (RESTORED FULL) -->
+  <!-- Baby Growth -->
   <div class="card">
     <h2>Baby Growth 🌱</h2>
+    <div id="babyEmoji" class="baby-emoji"></div>
     <p id="babySize"></p>
     <p id="babyInfo"></p>
     <p id="trimester"></p>
@@ -141,7 +147,7 @@ const remDays = days % 7;
 document.getElementById("pregnancy").innerText =
   weeks + " weeks " + remDays + " days ❤️";
 
-// Progress bar
+// Progress
 const progress = (weeks / 40) * 100;
 document.getElementById("progressFill").style.width = progress + "%";
 
@@ -153,28 +159,24 @@ fetch(API_URL + "?sheet=Messages")
     data[days % data.length].Message;
 });
 
-// Baby Growth (FULL with trimester)
+// Baby Growth Data
 const growth = {
-  4:{size:"Poppy Seed 🌱", info:"Baby just beginning", trimester:"1st Trimester 💫"},
-  5:{size:"Sesame Seed 🌾", info:"Heart forming", trimester:"1st Trimester 💫"},
-  6:{size:"Lentil 🫘", info:"Heartbeat may start", trimester:"1st Trimester 💫"},
-  7:{size:"Blueberry 🫐", info:"Brain developing", trimester:"1st Trimester 💫"},
-  8:{size:"Kidney Bean 🫘", info:"Baby moving", trimester:"1st Trimester 💫"},
-  9:{size:"Grape 🍇", info:"Stronger heartbeat", trimester:"1st Trimester 💫"},
-  10:{size:"Strawberry 🍓", info:"Fingers forming", trimester:"1st Trimester 💫"},
-  11:{size:"Fig 🍈", info:"Bones forming", trimester:"1st Trimester 💫"},
-  12:{size:"Lime 🍋", info:"Fully formed basics", trimester:"1st Trimester 💫"}
+  4:{emoji:"🌱", size:"Poppy Seed", info:"Baby just beginning", trimester:"1st Trimester 💫"},
+  5:{emoji:"🌾", size:"Sesame Seed", info:"Heart forming", trimester:"1st Trimester 💫"},
+  6:{emoji:"🫘", size:"Lentil", info:"Heartbeat may start", trimester:"1st Trimester 💫"},
+  7:{emoji:"🫐", size:"Blueberry", info:"Brain developing", trimester:"1st Trimester 💫"},
+  8:{emoji:"🫘", size:"Kidney Bean", info:"Baby moving", trimester:"1st Trimester 💫"},
+  9:{emoji:"🍇", size:"Grape", info:"Stronger heartbeat", trimester:"1st Trimester 💫"},
+  10:{emoji:"🍓", size:"Strawberry", info:"Fingers forming", trimester:"1st Trimester 💫"},
+  11:{emoji:"🍈", size:"Fig", info:"Bones forming", trimester:"1st Trimester 💫"},
+  12:{emoji:"🍋", size:"Lime", info:"Fully formed basics", trimester:"1st Trimester 💫"}
 };
 
 if(growth[weeks]){
-  document.getElementById("babySize").innerText =
-    "Size: " + growth[weeks].size;
-
-  document.getElementById("babyInfo").innerText =
-    growth[weeks].info;
-
-  document.getElementById("trimester").innerText =
-    growth[weeks].trimester;
+  document.getElementById("babyEmoji").innerText = growth[weeks].emoji;
+  document.getElementById("babySize").innerText = "Size: " + growth[weeks].size;
+  document.getElementById("babyInfo").innerText = growth[weeks].info;
+  document.getElementById("trimester").innerText = growth[weeks].trimester;
 }
 
 // Checklist
@@ -197,7 +199,7 @@ fetch(API_URL + "?sheet=Checklist")
   });
 });
 
-// Upload (FINAL FIXED)
+// Upload
 function uploadFile() {
   const fileInput = document.getElementById("fileInput");
   const file = fileInput.files[0];
@@ -231,8 +233,9 @@ function uploadFile() {
         status.innerText = "Upload failed ❌";
       }
     })
-    .catch(() => {
+    .catch((err) => {
       status.innerText = "Error uploading ❌";
+      console.error(err);
     });
   };
 
