@@ -22,7 +22,6 @@
       font-size: 18px;
       color: #555;
       margin-bottom: 10px;
-      animation: fadeIn 2s ease;
     }
 
     .container {
@@ -35,18 +34,12 @@
       padding: 20px;
       margin: 15px 0;
       box-shadow: 0 8px 20px rgba(0,0,0,0.08);
-      animation: fadeUp 0.8s ease;
     }
 
     .pregnancy-text {
       font-size: 24px;
       font-weight: bold;
       color: #e91e63;
-    }
-
-    .growth-emoji {
-      font-size: 50px;
-      margin: 10px 0;
     }
 
     .progress-bar {
@@ -65,12 +58,8 @@
       transition: width 1s ease;
     }
 
-    label {
-      display: block;
-      padding: 10px;
-      border-radius: 10px;
-      margin: 5px 0;
-      background: #fafafa;
+    input[type="file"] {
+      margin: 10px 0;
     }
 
     button {
@@ -81,14 +70,17 @@
       color: white;
     }
 
-    @keyframes fadeIn {
-      from {opacity:0}
-      to {opacity:1}
+    .status {
+      margin-top: 10px;
+      font-size: 14px;
     }
 
-    @keyframes fadeUp {
-      from {transform: translateY(20px); opacity:0}
-      to {transform: translateY(0); opacity:1}
+    label {
+      display: block;
+      padding: 10px;
+      border-radius: 10px;
+      margin: 5px 0;
+      background: #fafafa;
     }
   </style>
 </head>
@@ -113,10 +105,8 @@
   <!-- Baby Growth -->
   <div class="card">
     <h2>Baby Growth 🌱</h2>
-    <div id="babyEmoji" class="growth-emoji"></div>
     <p id="babySize"></p>
     <p id="babyInfo"></p>
-    <p id="trimester"></p>
   </div>
 
   <!-- Checklist -->
@@ -127,9 +117,11 @@
   <!-- Upload -->
   <div class="card">
     <h2>Upload Reports 📄</h2>
-    <input type="file" id="fileInput"><br><br>
+
+    <input type="file" id="fileInput"><br>
     <button onclick="uploadFile()">Upload</button>
-    <p id="uploadStatus"></p>
+
+    <p id="uploadStatus" class="status"></p>
   </div>
 
 </div>
@@ -148,10 +140,9 @@ const remDays = days % 7;
 document.getElementById("pregnancy").innerText =
   weeks + " weeks " + remDays + " days ❤️";
 
-// Progress bar (40 weeks total)
+// Progress
 const progress = (weeks / 40) * 100;
 document.getElementById("progressFill").style.width = progress + "%";
-
 
 // Message
 fetch(API_URL + "?sheet=Messages")
@@ -161,27 +152,23 @@ fetch(API_URL + "?sheet=Messages")
     data[days % data.length].Message;
 });
 
-
-// Baby Growth Data
+// Growth
 const growth = {
-  4:{emoji:"🌱", size:"Poppy Seed", info:"Baby is just beginning.", trimester:"1st Trimester 💫"},
-  5:{emoji:"🌾", size:"Sesame Seed", info:"Heart begins forming.", trimester:"1st Trimester 💫"},
-  6:{emoji:"🫘", size:"Lentil", info:"Heartbeat may start.", trimester:"1st Trimester 💫"},
-  7:{emoji:"🫐", size:"Blueberry", info:"Brain developing.", trimester:"1st Trimester 💫"},
-  8:{emoji:"🫘", size:"Kidney Bean", info:"Baby moving.", trimester:"1st Trimester 💫"},
-  9:{emoji:"🍇", size:"Grape", info:"Heartbeat stronger.", trimester:"1st Trimester 💫"},
-  10:{emoji:"🍓", size:"Strawberry", info:"Tiny fingers forming.", trimester:"1st Trimester 💫"},
-  11:{emoji:"🍈", size:"Fig", info:"Bones forming.", trimester:"1st Trimester 💫"},
-  12:{emoji:"🍋", size:"Lime", info:"Fully formed basics.", trimester:"1st Trimester 💫"}
+  4:{size:"Poppy Seed 🌱", info:"Baby just beginning"},
+  5:{size:"Sesame Seed 🌾", info:"Heart forming"},
+  6:{size:"Lentil 🫘", info:"Heartbeat may start"},
+  7:{size:"Blueberry 🫐", info:"Brain developing"},
+  8:{size:"Kidney Bean 🫘", info:"Baby moving"},
+  9:{size:"Grape 🍇", info:"Stronger heartbeat"},
+  10:{size:"Strawberry 🍓", info:"Fingers forming"}
 };
 
 if(growth[weeks]){
-  document.getElementById("babyEmoji").innerText = growth[weeks].emoji;
-  document.getElementById("babySize").innerText = "Size: " + growth[weeks].size;
-  document.getElementById("babyInfo").innerText = growth[weeks].info;
-  document.getElementById("trimester").innerText = growth[weeks].trimester;
+  document.getElementById("babySize").innerText =
+    "Size: " + growth[weeks].size;
+  document.getElementById("babyInfo").innerText =
+    growth[weeks].info;
 }
-
 
 // Checklist
 fetch(API_URL + "?sheet=Checklist")
@@ -199,22 +186,45 @@ fetch(API_URL + "?sheet=Checklist")
   });
 });
 
+// 🚀 FIXED Upload Function
+function uploadFile() {
+  const fileInput = document.getElementById("fileInput");
+  const file = fileInput.files[0];
+  const status = document.getElementById("uploadStatus");
 
-// Upload
-function uploadFile(){
-  const file = document.getElementById("fileInput").files[0];
-  if(!file) return alert("Select file");
+  if (!file) {
+    alert("Please select a file");
+    return;
+  }
+
+  status.innerText = "Uploading... ⏳";
 
   const reader = new FileReader();
-  reader.onload = function(){
+
+  reader.onload = function () {
     const base64 = reader.result.split(',')[1];
-    fetch(API_URL,{
-      method:"POST",
-      body:new URLSearchParams({file:base64,filename:file.name})
+
+    fetch(API_URL, {
+      method: "POST",
+      body: new URLSearchParams({
+        file: base64,
+        filename: file.name
+      })
     })
-    .then(res=>res.json())
-    .then(()=>document.getElementById("uploadStatus").innerText="Uploaded ❤️");
+    .then(res => res.json())
+    .then(data => {
+      if (data.success) {
+        status.innerText = "Successfully Uploaded ❤️";
+        fileInput.value = "";
+      } else {
+        status.innerText = "Upload failed ❌";
+      }
+    })
+    .catch(() => {
+      status.innerText = "Error uploading ❌";
+    });
   };
+
   reader.readAsDataURL(file);
 }
 
