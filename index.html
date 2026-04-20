@@ -61,6 +61,19 @@
       font-style: italic;
     }
 
+    input[type="file"] {
+      margin: 10px 0;
+    }
+
+    button {
+      padding: 10px 15px;
+      border: none;
+      border-radius: 10px;
+      background: #e91e63;
+      color: white;
+      font-size: 16px;
+    }
+
     .footer {
       margin-top: 20px;
       font-size: 12px;
@@ -75,15 +88,30 @@
 
 <div class="container">
 
+  <!-- Pregnancy -->
   <div class="card">
     <h2>Our Baby Journey 👶</h2>
     <p id="pregnancy" class="pregnancy-text"></p>
   </div>
 
+  <!-- Checklist -->
   <div class="card" id="checklistCard">
     <h2>Daily Care 🧘‍♀️</h2>
   </div>
 
+  <!-- Upload -->
+  <div class="card">
+    <h2>Upload Reports 📄</h2>
+
+    <input type="file" id="fileInput">
+    <br>
+
+    <button onclick="uploadFile()">Upload</button>
+
+    <p id="uploadStatus"></p>
+  </div>
+
+  <!-- Message -->
   <div class="card">
     <h2>From Jay 💌</h2>
     <p id="message" class="message"></p>
@@ -97,11 +125,11 @@
 
 <script>
 
-// 🔗 YOUR GOOGLE APPS SCRIPT API
+// 🔗 YOUR API
 const API_URL = "https://script.google.com/macros/s/AKfycbwngFia5JL6YIBZe60eY-5ZSJWZQqL_m5NL_Lx5rGbQi2VWQaBl4RXr6rM-eF7guiSLLQ/exec";
 
 
-// ❤️ Pregnancy Calculator
+// ❤️ Pregnancy Calculation
 const lmp = new Date("2026-03-21");
 const today = new Date();
 
@@ -115,7 +143,7 @@ document.getElementById("pregnancy").innerText =
   weeks + " weeks " + remDays + " days ❤️";
 
 
-// 💌 Load Messages from Google Sheets
+// 💌 Load Messages
 fetch(API_URL + "?sheet=Messages")
   .then(res => res.json())
   .then(data => {
@@ -123,13 +151,13 @@ fetch(API_URL + "?sheet=Messages")
     document.getElementById("message").innerText =
       data[msgIndex].Message;
   })
-  .catch(err => {
+  .catch(() => {
     document.getElementById("message").innerText =
       "Unable to load message 💔";
   });
 
 
-// 📋 Load Checklist from Google Sheets
+// 📋 Load Checklist
 fetch(API_URL + "?sheet=Checklist")
   .then(res => res.json())
   .then(data => {
@@ -151,10 +179,54 @@ fetch(API_URL + "?sheet=Checklist")
       container.appendChild(el);
     });
   })
-  .catch(err => {
+  .catch(() => {
     document.getElementById("checklistCard").innerHTML +=
       "<p>Failed to load checklist</p>";
   });
+
+
+// 📄 Upload File to Google Drive
+function uploadFile() {
+  const fileInput = document.getElementById("fileInput");
+  const file = fileInput.files[0];
+
+  if (!file) {
+    alert("Please select a file");
+    return;
+  }
+
+  const reader = new FileReader();
+
+  reader.onload = function() {
+    const base64 = reader.result.split(',')[1];
+
+    document.getElementById("uploadStatus").innerText = "Uploading... ⏳";
+
+    fetch(API_URL, {
+      method: "POST",
+      body: new URLSearchParams({
+        file: base64,
+        filename: file.name
+      })
+    })
+    .then(res => res.json())
+    .then(data => {
+      if (data.success) {
+        document.getElementById("uploadStatus").innerText =
+          "Uploaded successfully ❤️";
+      } else {
+        document.getElementById("uploadStatus").innerText =
+          "Upload failed ❌";
+      }
+    })
+    .catch(() => {
+      document.getElementById("uploadStatus").innerText =
+        "Error uploading ❌";
+    });
+  };
+
+  reader.readAsDataURL(file);
+}
 
 </script>
 
