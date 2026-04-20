@@ -102,11 +102,12 @@
     </div>
   </div>
 
-  <!-- Baby Growth -->
+  <!-- Baby Growth (RESTORED FULL) -->
   <div class="card">
     <h2>Baby Growth 🌱</h2>
     <p id="babySize"></p>
     <p id="babyInfo"></p>
+    <p id="trimester"></p>
   </div>
 
   <!-- Checklist -->
@@ -140,7 +141,7 @@ const remDays = days % 7;
 document.getElementById("pregnancy").innerText =
   weeks + " weeks " + remDays + " days ❤️";
 
-// Progress
+// Progress bar
 const progress = (weeks / 40) * 100;
 document.getElementById("progressFill").style.width = progress + "%";
 
@@ -152,22 +153,28 @@ fetch(API_URL + "?sheet=Messages")
     data[days % data.length].Message;
 });
 
-// Growth
+// Baby Growth (FULL with trimester)
 const growth = {
-  4:{size:"Poppy Seed 🌱", info:"Baby just beginning"},
-  5:{size:"Sesame Seed 🌾", info:"Heart forming"},
-  6:{size:"Lentil 🫘", info:"Heartbeat may start"},
-  7:{size:"Blueberry 🫐", info:"Brain developing"},
-  8:{size:"Kidney Bean 🫘", info:"Baby moving"},
-  9:{size:"Grape 🍇", info:"Stronger heartbeat"},
-  10:{size:"Strawberry 🍓", info:"Fingers forming"}
+  4:{size:"Poppy Seed 🌱", info:"Baby just beginning", trimester:"1st Trimester 💫"},
+  5:{size:"Sesame Seed 🌾", info:"Heart forming", trimester:"1st Trimester 💫"},
+  6:{size:"Lentil 🫘", info:"Heartbeat may start", trimester:"1st Trimester 💫"},
+  7:{size:"Blueberry 🫐", info:"Brain developing", trimester:"1st Trimester 💫"},
+  8:{size:"Kidney Bean 🫘", info:"Baby moving", trimester:"1st Trimester 💫"},
+  9:{size:"Grape 🍇", info:"Stronger heartbeat", trimester:"1st Trimester 💫"},
+  10:{size:"Strawberry 🍓", info:"Fingers forming", trimester:"1st Trimester 💫"},
+  11:{size:"Fig 🍈", info:"Bones forming", trimester:"1st Trimester 💫"},
+  12:{size:"Lime 🍋", info:"Fully formed basics", trimester:"1st Trimester 💫"}
 };
 
 if(growth[weeks]){
   document.getElementById("babySize").innerText =
     "Size: " + growth[weeks].size;
+
   document.getElementById("babyInfo").innerText =
     growth[weeks].info;
+
+  document.getElementById("trimester").innerText =
+    growth[weeks].trimester;
 }
 
 // Checklist
@@ -175,18 +182,22 @@ fetch(API_URL + "?sheet=Checklist")
 .then(res=>res.json())
 .then(data=>{
   const c = document.getElementById("checklistCard");
+
   data.forEach((item,i)=>{
     const checked = localStorage.getItem("c_"+i)==="true";
+
     const el = document.createElement("label");
     el.innerHTML = `<input type="checkbox" ${checked?"checked":""}> ${item.Task}`;
+
     el.querySelector("input").onchange = e=>{
       localStorage.setItem("c_"+i,e.target.checked);
     };
+
     c.appendChild(el);
   });
 });
 
-// 🚀 FIXED Upload Function
+// Upload (FINAL FIXED)
 function uploadFile() {
   const fileInput = document.getElementById("fileInput");
   const file = fileInput.files[0];
